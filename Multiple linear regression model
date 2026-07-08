@@ -1,0 +1,48 @@
+
+#LOAD AND PREPARE DATA
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+from scipy import stats
+from sklearn.preprocessing import LabelEncoder
+
+# Load data
+df = pd.read_csv("student_mental_health_hybrid_learning.csv")
+
+# Drop ID (not a predictor)
+df = df.drop(columns=['student_id'])
+
+# Clean gender (fix "M", "male", "Male", etc.)
+df['gender'] = df['gender'].str.strip().str.lower()
+gender_map = {
+    'male': 'male', 'm': 'male',
+    'female': 'female', 'f': 'female',
+    'non-binary': 'non-binary',
+    'prefer not to say': 'prefer not to say'
+}
+df['gender'] = df['gender'].map(gender_map)
+
+# Drop rows with missing target (CGPA)
+df = df.dropna(subset=['cgpa'])
+
+# Fill missing numeric values with median
+num_cols = df.select_dtypes(include=['float64', 'int64']).columns
+df[num_cols] = df[num_cols].fillna(df[num_cols].median())
+
+# Encode all text columns to numbers
+cat_cols = df.select_dtypes(include=['object']).columns
+for col in cat_cols:
+    df[col] = LabelEncoder().fit_transform(df[col])
+
+# Separate X and y
+X = df.drop('cgpa', axis=1)
+y = df['cgpa']
+
+# Add constant (intercept) for statsmodels
+X_const = sm.add_constant(X)
+
+print("Data ready!")
+print(f"Shape: {X.shape}")
+print(f"Features: {list(X.columns)}")
+print(f"\nCGPA stats:\n{y.describe()}")
