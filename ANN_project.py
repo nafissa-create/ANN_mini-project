@@ -49,7 +49,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 # Build the ANN Model
-# ============================================
 
 model = Sequential()
 
@@ -62,16 +61,14 @@ model.add(Dense(32, activation='relu'))
 # Output Layer
 model.add(Dense(1))
 # Compile the Model
-# ============================================
 
 model.compile(
     optimizer='adam',
     loss='mean_squared_error',
     metrics=['mae']
 )
-# ============================================
+
 # Train the ANN
-# ============================================
 
 history = model.fit(
     X_train,
@@ -85,9 +82,9 @@ loss, mae = model.evaluate(X_test, y_test)
 
 print("Test Loss:", loss)
 print("Mean Absolute Error:", mae)
-# ============================================
+
 # Predict PHQ-9 Scores
-# ============================================
+
 
 predictions = model.predict(X_test)
 
@@ -101,9 +98,9 @@ print("MAE :", mae)
 print("MSE :", mse)
 print("RMSE:", rmse)
 print("R²  :", r2)
-# ============================================
+
 # Actual vs Predicted Values
-# ============================================
+
 
 plt.figure(figsize=(7,7))
 
