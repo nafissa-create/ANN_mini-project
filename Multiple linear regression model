@@ -1,5 +1,4 @@
-
-#LOAD AND PREPARE DATA
+#needed libraries
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +12,7 @@ df = pd.read_csv("student_mental_health_hybrid_learning.csv")
 # Drop ID (not a predictor)
 df = df.drop(columns=['student_id'])
 
-# Clean gender (fix "M", "male", "Male", etc.)
+# Clean gender (fix "M", "male", "Male")
 df['gender'] = df['gender'].str.strip().str.lower()
 gender_map = {
     'male': 'male', 'm': 'male',
@@ -35,14 +34,124 @@ cat_cols = df.select_dtypes(include=['object']).columns
 for col in cat_cols:
     df[col] = LabelEncoder().fit_transform(df[col])
 
-# Separate X and y
+# determine the independe variables X and the response variable y
 X = df.drop('cgpa', axis=1)
 y = df['cgpa']
 
 # Add constant (intercept) for statsmodels
 X_const = sm.add_constant(X)
-
-print("Data ready!")
+#data summary
 print(f"Shape: {X.shape}")
 print(f"Features: {list(X.columns)}")
 print(f"\nCGPA stats:\n{y.describe()}")
+
+# fit a full multiple linear regression model
+model_full = sm.OLS(y, X_const).fit()
+print(model_full.summary())
+
+residuals = model_full.resid
+
+# Shapiro-Wilk test for normality
+
+shapiro_stat, shapiro_p = stats.shapiro(residuals)
+print(f"\n{'='*60}")
+print("RESIDUAL NORMALITY TEST")
+print(f"{'='*60}")
+print(f"Shapiro-Wilk Statistic: {shapiro_stat:.4f}")
+print(f"Shapiro-Wilk p-value:   {shapiro_p:.4f}")
+if shapiro_p < 0.05:
+    print("→ Residuals are not normal. Box-Cox transformation is needed.")
+else:
+    print("→ Residuals look normal.")
+ 
+
+# Box-cox transformation
+from scipy import stats
+
+# Box-Cox requires strictly positive values
+
+#  Get optimal lambda from Box-Cox
+_, lmbda_optimal = stats.boxcox(y)
+print(f"Optimal Box-Cox lambda: {lmbda_optimal:.4f}")
+
+#  Round to nearest interpretable lambda
+supported = [2, 1, 0.5, 0, -0.5, -2]
+lmbda = min(supported, key=lambda x: abs(x - lmbda_optimal))
+print(f"Rounded lambda: {lmbda}")
+
+# Apply transformation
+if lmbda == 1:
+    y_best = y.copy()
+    transform_name = "No transformation"
+elif lmbda == 0.5:
+    y_best = np.sqrt(y)
+    transform_name = "Square root"
+elif lmbda == 0:
+    y_best = np.log(y)
+    transform_name = "Natural log"
+elif lmbda == -0.5:
+    y_best = 1 / np.sqrt(y)
+    transform_name = "Inverse square root"
+elif lmbda == 2:
+    y_best = y ** 2
+    transform_name = "Square"
+elif lmbda == -2:
+    y_best = 1 / (y ** 2)
+    transform_name = "Inverse square"
+
+print(f"Transformation needed is the: {transform_name}")
+
+# 4. Fit the model
+best_model = sm.OLS(y_best, X_const).fit()
+print(best_model.summary())
+
+# model selection 
+# Identify significant predictors from the full model (p < 0.05)
+# We keep major_category too since p = 0.048 is borderline
+significant_variables = [
+    'major_category',
+    'daily_sleep_hours',
+    'gad7_score',
+    'weekly_study_hours',
+    'class_attendance_percent',
+    'has_part_time_job'
+]
+
+# Build reduced model
+X_reduced = X[significant_variables]
+X_reduced_const = sm.add_constant(X_reduced)
+model_reduced = sm.OLS(y_best, X_reduced_const).fit()
+
+# Mallows' Cp helper
+def mallows_cp(model_subset, model_full, n):
+    p_subset = model_subset.params.shape[0]
+    sse_subset = sum(model_subset.resid ** 2)
+    mse_full = sum(model_full.resid ** 2) / model_full.df_resid
+    cp = sse_subset / mse_full - (n - 2 * p_subset)
+    return cp
+
+n = len(y_best)
+cp_full = mallows_cp(best_model, best_model, n)
+cp_reduced = mallows_cp(model_reduced, best_model, n)
+
+# Compare
+print("\n" + "="*70)
+print("MODEL SELECTION TABLE")
+print("="*70)
+print(f"{'Model':<20} {'R²':>8} {'Adj R²':>8} {'AIC':>10} {'BIC':>10} {'Cp':>10}")
+print("-"*70)
+print(f"{'Full (16 vars)':<20} {best_model.rsquared:>8.4f} {best_model.rsquared_adj:>8.4f} {best_model.aic:>10.2f} {best_model.bic:>10.2f} {cp_full:>10.2f}")
+print(f"{'Reduced (6 vars)':<20} {model_reduced.rsquared:>8.4f} {model_reduced.rsquared_adj:>8.4f} {model_reduced.aic:>10.2f} {model_reduced.bic:>10.2f} {cp_reduced:>10.2f}")
+
+# Pick the best
+if model_reduced.aic < best_model.aic:
+    print(f"\n→ Reduced model is the best (lower AIC by {best_model.aic - model_reduced.aic:.2f}).")
+    final_model = model_reduced
+    final_name = "Reduced"
+else:
+    print(f"\n→ Full model is the best")
+    final_model = best_model
+    final_name = "Full"
+
+print(f"\nFinal model: {final_name}")
+print(final_model.summary())
