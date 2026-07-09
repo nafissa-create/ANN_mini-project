@@ -64,9 +64,9 @@ categorical variables one-hot encoded, features scaled
 
 * Overall accuracy: 59.3% (correctly sorted about 6 in 10 students into the right risk band)
 * Best at spotting clear-cut cases: students with minimal or severe risk were identified most reliably
-* Weakest at telling "Mild" and "Moderate" apart — these two middle categories get confused with each other most often
+* Weakest at telling "Mild" and "Moderate" apart, these two middle categories get confused with each other most often
 * Reassuring pattern: the model rarely mixes up low-risk and high-risk students; its mistakes tend to be between neighboring bands, not opposite ends
-* Limitation: the model fit the training data almost perfectly but performed noticeably worse on new data, a sign it was memorizing patterns rather than learning generalizable ones — likely because the dataset (500 students) is fairly small
+* Limitation: the model fit the training data almost perfectly but performed noticeably worse on new data, a sign it was memorizing patterns rather than learning generalizable ones, likely because the dataset (500 students) is fairly small
 
 
 ## CGPA Prediction (Linear Regression)
