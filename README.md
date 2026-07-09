@@ -14,6 +14,8 @@ The project aims to:
 - Compare neural networks and linear regression for different prediction tasks
 - Evaluate predictive performance using appropriate metrics
 - Support data-driven decision making through interpretable models
+- Both analyses use the same 50/50 train-test split (random_state=42) so that
+performance is compared under identical data conditions.
 
 # Dataset
 student_mental_health_hybrid_learning.csv
@@ -30,10 +32,16 @@ Key variables:
 
 # Methodology
 
-## Analysis 1: PHQ-9 Prediction 
-- Algorithm: Artificial Neural Network (MLPClassifier/Regressor)
-- Target: PHQ-9 depression score
-- Rationale: ANN captures complex non-linear interactions between mental health indicators
+## Analysis 1: PHQ-9 Risk Classification
+
+-Algorithm: Artificial Neural Network (Keras Sequential)
+-Target: PHQ-9 score, converted into 4 clinical risk bands (Minimal / Mild /
+Moderate / Moderately Severe-Severe) rather than predicted as a raw number
+-Rationale: PHQ-9 is a self-reported screening measure. Framing
+it as risk-band classification mirrors how PHQ-9 is actually used in practice and allows evaluation via confusion matrix, showing which
+risk levels get confused with each other.
+-Preprocessing: rows with missing values dropped, gender labels standardized,
+categorical variables one-hot encoded, features scaled 
 
 ## Analysis 2: CGPA Prediction
 - Algorithm: Multiple Linear Regression
@@ -44,9 +52,11 @@ Key variables:
 # Tools and Technologies
 - Python
 - pandas, NumPy
-- scikit-learn (preprocessing, train-test split)
+- scikit-learn (preprocessing, train-test split,metrics)
+- TensorFlow/Keras(neural network)
 - statsmodels (linear regression, AIC, BIC)
 - scipy (Box-Cox transformation)
+- matplotlib (confusion matrix, training curves)
 
 # Results
 
