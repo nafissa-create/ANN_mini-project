@@ -34,7 +34,7 @@ Key variables:
 
 ## Analysis 1: PHQ-9 Risk Classification
 
--Algorithm: Artificial Neural Network (Keras Sequential)
+-Algorithm: Artificial Neural Network (Keras Sequential,64→32→4 softmax)
 -Target: PHQ-9 score, converted into 4 clinical risk bands (Minimal / Mild /
 Moderate / Moderately Severe-Severe) rather than predicted as a raw number
 -Rationale: PHQ-9 is a self-reported screening measure. Framing
