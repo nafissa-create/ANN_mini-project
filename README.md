@@ -60,7 +60,32 @@ categorical variables one-hot encoded, features scaled
 
 # Results
 
-## PHQ-9 Prediction (ANN)
+## PHQ-9 Risk Classification (ANN)
+
+MetricValueTest Accuracy: 59.3%
+Test Loss: 1.43
+Classification report (test set, n=226):
+
+Confusion matrix takeaway: the model is most reliable at the extremes,
+"Minimal" (0.73 F1) and "Moderately Severe/Severe" (0.65 F1) are identified
+with reasonable confidence. The middle bands, "Mild" and "Moderate," are
+where the model struggles most (F1 of 0.46 and 0.44), and this is also
+where most misclassifications land — adjacent-band confusion (e.g., Mild
+predicted as Moderate or vice versa) rather than the far more serious
+Minimal-vs-Severe type of error. This is the more forgivable failure mode
+for a screening tool: the model rarely mistakes a low-risk student for a
+high-risk one.
+
+Overfitting note: training accuracy reached 100% by the later epochs
+while validation accuracy plateaued around 64–67%, and validation loss
+climbed steadily after roughly epoch 20–30 while training loss kept
+falling. This is a classic overfitting pattern, expected given the modest
+dataset size (500 students, only ~250 in the training split after the
+50/50 divide). Worth mentioning as a limitation: with more data, or
+regularization (dropout, L2, early stopping), the model would likely
+generalize better. This is also a reasonable talking point if asked why a
+simpler model might be competitive here — a small, noisy dataset limits
+how much a more complex model can actually exploit.
 
 
 ## CGPA Prediction (Linear Regression)
