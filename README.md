@@ -34,13 +34,13 @@ Key variables:
 
 ## Analysis 1: PHQ-9 Risk Classification
 
--Algorithm: Artificial Neural Network (Keras Sequential,64→32→4 softmax)
--Target: PHQ-9 score, converted into 4 clinical risk bands (Minimal / Mild /
+* Algorithm: Artificial Neural Network (Keras Sequential,64→32→4 softmax)
+* Target: PHQ-9 score, converted into 4 clinical risk bands (Minimal / Mild /
 Moderate / Moderately Severe-Severe) rather than predicted as a raw number
--Rationale: PHQ-9 is a self-reported screening measure. Framing
+* Rationale: PHQ-9 is a self-reported screening measure. Framing
 it as risk-band classification mirrors how PHQ-9 is actually used in practice and allows evaluation via confusion matrix, showing which
 risk levels get confused with each other.
--Preprocessing: rows with missing values dropped, gender labels standardized,
+* Preprocessing: rows with missing values dropped, gender labels standardized,
 categorical variables one-hot encoded, features scaled 
 
 ## Analysis 2: CGPA Prediction
